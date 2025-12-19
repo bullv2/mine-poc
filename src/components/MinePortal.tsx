@@ -57,9 +57,21 @@ export default function MinePortal({ mine, onClose }: MinePortalProps) {
         }
       }}
     >
-      <div className="relative w-full max-w-2xl bg-[#1E1E1E] border border-[#333333] rounded-lg shadow-2xl overflow-hidden animate-zoom-in">
+      <div 
+        className="relative w-full max-w-2xl backdrop-blur-md border rounded-lg shadow-2xl overflow-hidden animate-zoom-in"
+        style={{
+          backgroundColor: 'rgba(30, 30, 30, 0.75)',
+          borderColor: 'rgba(51, 51, 51, 0.4)',
+        }}
+      >
         {/* Header */}
-        <div className="bg-[#252525] border-b border-[#333333] px-6 py-4 flex items-center justify-between">
+        <div 
+          className="backdrop-blur-sm border-b px-6 py-4 flex items-center justify-between"
+          style={{
+            backgroundColor: 'rgba(37, 37, 37, 0.7)',
+            borderBottomColor: 'rgba(51, 51, 51, 0.4)',
+          }}
+        >
           <div className="flex items-center gap-3">
             {getStatusDot(mine.status)}
             <h2 className="text-xl font-bold text-white tracking-wide uppercase">
@@ -78,7 +90,13 @@ export default function MinePortal({ mine, onClose }: MinePortalProps) {
         <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
           {/* Status & Metrics Section */}
           <div className="grid grid-cols-3 gap-4">
-            <div className="bg-[#252525] border border-[#333333] rounded p-4">
+            <div 
+              className="backdrop-blur-sm border rounded p-4"
+              style={{
+                backgroundColor: 'rgba(37, 37, 37, 0.6)',
+                borderColor: 'rgba(51, 51, 51, 0.4)',
+              }}
+            >
               <div className="text-xs text-gray-400 uppercase tracking-wider mb-2">
                 Status
               </div>
@@ -92,7 +110,13 @@ export default function MinePortal({ mine, onClose }: MinePortalProps) {
               </div>
             </div>
 
-            <div className="bg-[#252525] border border-[#333333] rounded p-4">
+            <div 
+              className="backdrop-blur-sm border rounded p-4"
+              style={{
+                backgroundColor: 'rgba(37, 37, 37, 0.6)',
+                borderColor: 'rgba(51, 51, 51, 0.4)',
+              }}
+            >
               <div className="text-xs text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-1">
                 <Thermometer className="w-3 h-3" />
                 Temperature
@@ -102,7 +126,13 @@ export default function MinePortal({ mine, onClose }: MinePortalProps) {
               </div>
             </div>
 
-            <div className="bg-[#252525] border border-[#333333] rounded p-4">
+            <div 
+              className="backdrop-blur-sm border rounded p-4"
+              style={{
+                backgroundColor: 'rgba(37, 37, 37, 0.6)',
+                borderColor: 'rgba(51, 51, 51, 0.4)',
+              }}
+            >
               <div className="text-xs text-gray-400 uppercase tracking-wider mb-2">
                 Mine Type
               </div>
@@ -114,7 +144,13 @@ export default function MinePortal({ mine, onClose }: MinePortalProps) {
 
           {/* Location & Production */}
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-[#252525] border border-[#333333] rounded p-4">
+            <div 
+              className="backdrop-blur-sm border rounded p-4"
+              style={{
+                backgroundColor: 'rgba(37, 37, 37, 0.6)',
+                borderColor: 'rgba(51, 51, 51, 0.4)',
+              }}
+            >
               <div className="text-xs text-gray-400 uppercase tracking-wider mb-2">
                 Location
               </div>
@@ -123,7 +159,13 @@ export default function MinePortal({ mine, onClose }: MinePortalProps) {
               </div>
             </div>
 
-            <div className="bg-[#252525] border border-[#333333] rounded p-4">
+            <div 
+              className="backdrop-blur-sm border rounded p-4"
+              style={{
+                backgroundColor: 'rgba(37, 37, 37, 0.6)',
+                borderColor: 'rgba(51, 51, 51, 0.4)',
+              }}
+            >
               <div className="text-xs text-gray-400 uppercase tracking-wider mb-2">
                 Production
               </div>

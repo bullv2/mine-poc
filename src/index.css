@@ -29,7 +29,7 @@
 
 @layer base {
   * {
-    @apply border-border;
+    /* Removed @apply border-border to allow custom border colors */
   }
   body {
     @apply bg-background text-foreground;

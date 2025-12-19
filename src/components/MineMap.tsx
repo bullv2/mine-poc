@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import Globe from 'react-globe.gl';
 import { MineLocation } from '../mockData';
 import MinePortal from './MinePortal';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import * as THREE from 'three';
 
 interface MineMapProps {
@@ -19,6 +20,8 @@ export default function MineMap({ mines, selectedMine, onMineSelect }: MineMapPr
   const [portalMine, setPortalMine] = useState<MineLocation | null>(null);
   const [labelPositions, setLabelPositions] = useState<Map<string, { x: number; y: number }>>(new Map());
   const [globeKey, setGlobeKey] = useState(0); // Key to force globe re-render
+  const [mineListOpen, setMineListOpen] = useState(false); // Dropdown state
+  const mineListRef = useRef<HTMLDivElement>(null);
 
   // Prepare points data - store color and info, but create Three.js objects dynamically
   const points = useMemo(() => {
@@ -45,8 +48,13 @@ export default function MineMap({ mines, selectedMine, onMineSelect }: MineMapPr
   }, [mines]);
 
   // Update label positions based on pin screen coordinates using react-globe.gl's getScreenCoords
+  // Render labels together with globe for better UX
   useEffect(() => {
-    if (!globeReady || !globeEl.current || !globeContainerRef.current) return;
+    if (!globeReady || !globeEl.current || !globeContainerRef.current) {
+      // Clear labels if globe is not ready
+      setLabelPositions(new Map());
+      return;
+    }
 
     const updateLabelPositions = () => {
       const newPositions = new Map<string, { x: number; y: number }>();
@@ -55,7 +63,6 @@ export default function MineMap({ mines, selectedMine, onMineSelect }: MineMapPr
         // Use react-globe.gl's built-in getScreenCoords method
         const globeInstance = globeEl.current;
         if (!globeInstance || typeof globeInstance.getScreenCoords !== 'function') {
-          console.warn('getScreenCoords not available yet');
           return;
         }
 
@@ -70,13 +77,17 @@ export default function MineMap({ mines, selectedMine, onMineSelect }: MineMapPr
           if (screenCoords && screenCoords.x !== undefined && screenCoords.y !== undefined) {
             const containerRect = globeContainerRef.current!.getBoundingClientRect();
             // getScreenCoords returns coordinates relative to the globe container
-            // Adjust for container position if needed
             const x = screenCoords.x;
             const y = screenCoords.y;
             
-            // Only show label if coordinates are valid (on screen)
-            if (!isNaN(x) && !isNaN(y) && x >= 0 && x <= containerRect.width && y >= 0 && y <= containerRect.height) {
-              newPositions.set(point.id, { x, y });
+            // Only show label if coordinates are valid (on screen or slightly off-screen for smooth transitions)
+            if (!isNaN(x) && !isNaN(y)) {
+              // Allow labels slightly outside bounds for smooth transitions
+              const margin = 50;
+              if (x >= -margin && x <= containerRect.width + margin && 
+                  y >= -margin && y <= containerRect.height + margin) {
+                newPositions.set(point.id, { x, y });
+              }
             }
           }
         });
@@ -87,12 +98,14 @@ export default function MineMap({ mines, selectedMine, onMineSelect }: MineMapPr
       }
     };
 
+    // Initial update immediately when globe is ready
+    updateLabelPositions();
+    
     // Update positions frequently for smooth movement during rotation
     const interval = setInterval(updateLabelPositions, 16); // ~60fps
-    updateLabelPositions(); // Initial update
 
     return () => clearInterval(interval);
-  }, [globeReady, points]);
+  }, [globeReady, points, globeKey]); // Include globeKey to re-render labels when globe re-renders
 
   // Create rings (halos) around each point for pulsing effect
   const rings = useMemo(() => mines.map((mine) => ({
@@ -151,6 +164,23 @@ export default function MineMap({ mines, selectedMine, onMineSelect }: MineMapPr
     }
   }, [selectedMine]);
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (mineListRef.current && !mineListRef.current.contains(event.target as Node)) {
+        setMineListOpen(false);
+      }
+    };
+
+    if (mineListOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [mineListOpen]);
+
   // Removed the checkGlobe useEffect - it was causing re-render loops
 
   const handlePointClick = (point: any) => {
@@ -173,6 +203,18 @@ export default function MineMap({ mines, selectedMine, onMineSelect }: MineMapPr
   }, []);
 
   // Removed objectThreeObjectFn - no more 3D pins
+
+  const handleMineListClick = (mine: MineLocation) => {
+    handlePointClick(mine);
+    // Center globe on selected mine
+    if (globeEl.current) {
+      const { lat, lng } = mine.coordinates;
+      globeEl.current.pointOfView(
+        { lat, lng, altitude: 2.5 },
+        1000
+      );
+    }
+  };
 
   return (
     <div ref={globeContainerRef} className="w-full h-full relative bg-slate-950 overflow-hidden">
@@ -238,18 +280,14 @@ export default function MineMap({ mines, selectedMine, onMineSelect }: MineMapPr
         enablePointerInteraction={true}
       />
       
-      {/* Debug info */}
-      <div className="absolute top-4 right-4 bg-red-900/80 text-white p-2 text-xs z-20 font-mono">
-        <div>Points: {points.length}</div>
-        <div>Globe Ready: {globeReady ? '✅ Yes' : '❌ No'}</div>
-        <div>Ref Set: {globeEl.current ? 'Yes' : 'No'}</div>
-        <div>Hovered: {hoveredMine?.name || 'None'}</div>
-        <div>Rings: {rings.length}</div>
-        <div>Portal: {showPortal ? 'Open' : 'Closed'}</div>
-      </div>
-      
       {/* Legend */}
-      <div className="absolute top-4 left-4 bg-[#1E1E1E]/95 backdrop-blur-sm border border-[#333333] rounded-lg p-4 z-10">
+      <div 
+        className="absolute top-4 left-4 backdrop-blur-md border rounded-lg p-4 z-50"
+        style={{
+          backgroundColor: 'rgba(30, 30, 30, 0.65)',
+          borderColor: 'rgba(51, 51, 51, 0.4)',
+        }}
+      >
         <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Mine Status</h3>
         <div className="space-y-2 text-xs">
           <div className="flex items-center gap-2">
@@ -265,14 +303,25 @@ export default function MineMap({ mines, selectedMine, onMineSelect }: MineMapPr
             <span className="text-gray-300">Incident</span>
           </div>
         </div>
-        <div className="mt-3 pt-3 border-t border-[#333333] text-xs text-gray-500">
+        <div 
+          className="mt-3 pt-3 border-t text-xs text-gray-500"
+          style={{
+            borderTopColor: 'rgba(51, 51, 51, 0.4)',
+          }}
+        >
           Click pins to view details
         </div>
       </div>
 
       {/* Hovered mine info */}
       {hoveredMine && !showPortal && (
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-[#1E1E1E]/95 backdrop-blur-sm border border-[#333333] rounded-lg p-3 z-10 animate-fade-in">
+        <div 
+          className="absolute bottom-4 left-1/2 transform -translate-x-1/2 backdrop-blur-md border rounded-lg p-3 z-10 animate-fade-in"
+          style={{
+            backgroundColor: 'rgba(30, 30, 30, 0.65)',
+            borderColor: 'rgba(51, 51, 51, 0.4)',
+          }}
+        >
           <div className="flex items-center gap-2 text-sm">
             <div 
               className="w-3 h-3 rounded-full shadow-lg"
@@ -316,9 +365,9 @@ export default function MineMap({ mines, selectedMine, onMineSelect }: MineMapPr
             }}
           >
             <div 
-              className="px-3 py-1.5 rounded border-2 shadow-lg backdrop-blur-sm transition-all hover:shadow-xl"
+              className="px-3 py-1.5 rounded border-2 shadow-lg backdrop-blur-md transition-all hover:shadow-xl"
               style={{
-                backgroundColor: 'rgba(30, 30, 30, 0.98)',
+                backgroundColor: 'rgba(30, 30, 30, 0.7)',
                 borderColor: color,
                 minWidth: '150px',
                 textAlign: 'center',
@@ -346,6 +395,113 @@ export default function MineMap({ mines, selectedMine, onMineSelect }: MineMapPr
           onClose={handleClosePortal} 
         />
       )}
+
+      {/* Mine Navigation List Dropdown - Right Side */}
+      <div 
+        ref={mineListRef}
+        className="absolute top-4 right-4 w-64 z-50"
+      >
+        {/* Dropdown Button */}
+        <button
+          onClick={() => setMineListOpen(!mineListOpen)}
+          className="w-full backdrop-blur-md border rounded-lg px-4 py-3 flex items-center justify-between transition-all hover:shadow-lg"
+          style={{
+            backgroundColor: 'rgba(30, 30, 30, 0.65)',
+            borderColor: 'rgba(51, 51, 51, 0.4)',
+          }}
+        >
+          <div className="text-left">
+            <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wider">Mine Locations</h3>
+            <p className="text-xs text-gray-500 mt-1">{mines.length} mines</p>
+          </div>
+          {mineListOpen ? (
+            <ChevronUp className="w-5 h-5 text-gray-400" />
+          ) : (
+            <ChevronDown className="w-5 h-5 text-gray-400" />
+          )}
+        </button>
+
+        {/* Dropdown Content */}
+        {mineListOpen && (
+          <div 
+            className="mt-2 backdrop-blur-md border rounded-lg overflow-hidden max-h-[calc(100vh-12rem)] flex flex-col animate-fade-in"
+            style={{
+              backgroundColor: 'rgba(30, 30, 30, 0.65)',
+              borderColor: 'rgba(51, 51, 51, 0.4)',
+            }}
+          >
+            <div className="overflow-y-auto flex-1">
+              <div className="p-2 space-y-1">
+                {mines.map((mine) => {
+                  const color = 
+                    mine.status === 'Active' ? '#22c55e' :
+                    mine.status === 'Maintenance' ? '#eab308' :
+                    '#ef4444';
+                  
+                  const isSelected = selectedMine?.id === mine.id;
+                  const isHovered = hoveredMine?.id === mine.id;
+                  
+                  return (
+                    <button
+                      key={mine.id}
+                      onClick={() => {
+                        handleMineListClick(mine);
+                        setMineListOpen(false); // Close dropdown after selection
+                      }}
+                      className="w-full text-left px-3 py-2 rounded transition-all cursor-pointer border-l-2"
+                      style={{
+                        backgroundColor: isSelected 
+                          ? 'rgba(51, 51, 51, 0.6)' 
+                          : isHovered 
+                            ? 'rgba(42, 42, 42, 0.5)' 
+                            : 'transparent',
+                        borderLeftColor: isSelected ? color : 'transparent',
+                      }}
+                      onMouseEnter={(e) => {
+                        setHoveredMine(mine);
+                        if (!isSelected && !isHovered) {
+                          e.currentTarget.style.backgroundColor = 'rgba(37, 37, 37, 0.4)';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (hoveredMine?.id === mine.id) {
+                          setHoveredMine(null);
+                        }
+                        if (!isSelected && !isHovered) {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                        }
+                      }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <div 
+                          className="w-2 h-2 rounded-full flex-shrink-0"
+                          style={{ 
+                            backgroundColor: color,
+                            boxShadow: `0 0 6px ${color}80`
+                          }}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className={`text-sm font-medium truncate ${
+                            isSelected ? 'text-white' : 'text-gray-300'
+                          }`}>
+                            {mine.name}
+                          </div>
+                          <div className="text-xs text-gray-500 truncate">{mine.type}</div>
+                        </div>
+                        {mine.incidents.filter(i => i.status === 'Open').length > 0 && (
+                          <div className="flex-shrink-0 bg-red-500/20 text-red-400 text-xs px-1.5 py-0.5 rounded">
+                            {mine.incidents.filter(i => i.status === 'Open').length}
+                          </div>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

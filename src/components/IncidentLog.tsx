@@ -57,20 +57,20 @@ export default function IncidentLog({ mines }: IncidentLogProps) {
   };
 
   return (
-    <div className="bg-slate-900 border-t border-slate-800 p-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-            <AlertCircle className="w-6 h-6" />
-            Incident Reporting Log
-          </h2>
-          <div className="text-sm text-slate-400">
-            Total: {filteredIncidents.length} incidents
-          </div>
+    <div 
+      className="h-full flex flex-col backdrop-blur-sm p-6 overflow-hidden"
+      style={{
+        backgroundColor: 'rgba(30, 30, 30, 0.7)',
+      }}
+    >
+      <div className="flex items-center justify-between mb-6 flex-shrink-0">
+        <div className="text-sm text-gray-400">
+          Total: <span className="text-white font-semibold">{filteredIncidents.length}</span> incidents
         </div>
+      </div>
 
         {/* Filters */}
-        <div className="mb-6 space-y-4">
+        <div className="mb-6 space-y-4 flex-shrink-0">
           {/* Search */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
@@ -81,7 +81,11 @@ export default function IncidentLog({ mines }: IncidentLogProps) {
               placeholder="Search by mine name, type, or description..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 backdrop-blur-sm border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              style={{
+                backgroundColor: 'rgba(37, 37, 37, 0.6)',
+                borderColor: 'rgba(51, 51, 51, 0.4)',
+              }}
             />
           </div>
 
@@ -92,7 +96,11 @@ export default function IncidentLog({ mines }: IncidentLogProps) {
               name="incident-type-filter"
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
-              className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-4 py-2 backdrop-blur-sm border rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              style={{
+                backgroundColor: 'rgba(37, 37, 37, 0.6)',
+                borderColor: 'rgba(51, 51, 51, 0.4)',
+              }}
             >
               <option value="all">All Types</option>
               <option value="Equipment Failure">Equipment Failure</option>
@@ -107,7 +115,11 @@ export default function IncidentLog({ mines }: IncidentLogProps) {
               name="incident-status-filter"
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
-              className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-4 py-2 backdrop-blur-sm border rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              style={{
+                backgroundColor: 'rgba(37, 37, 37, 0.6)',
+                borderColor: 'rgba(51, 51, 51, 0.4)',
+              }}
             >
               <option value="all">All Status</option>
               <option value="Open">Open</option>
@@ -117,10 +129,22 @@ export default function IncidentLog({ mines }: IncidentLogProps) {
         </div>
 
         {/* Incident Table */}
-        <div className="bg-slate-800 rounded-lg border border-slate-700 overflow-hidden">
-          <div className="overflow-x-auto">
+        <div 
+          className="backdrop-blur-sm rounded-lg border overflow-hidden flex-1 flex flex-col min-h-0"
+          style={{
+            backgroundColor: 'rgba(37, 37, 37, 0.6)',
+            borderColor: 'rgba(51, 51, 51, 0.4)',
+          }}
+        >
+          <div className="overflow-auto flex-1">
             <table className="w-full">
-              <thead className="bg-slate-900 border-b border-slate-700">
+              <thead 
+                className="backdrop-blur-sm border-b sticky top-0 z-10"
+                style={{
+                  backgroundColor: 'rgba(30, 30, 30, 0.7)',
+                  borderBottomColor: 'rgba(51, 51, 51, 0.4)',
+                }}
+              >
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
                     Date
@@ -142,7 +166,7 @@ export default function IncidentLog({ mines }: IncidentLogProps) {
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-700">
+              <tbody className="divide-y divide-[#333333]">
                 {filteredIncidents.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="px-6 py-8 text-center text-slate-400">
@@ -151,7 +175,7 @@ export default function IncidentLog({ mines }: IncidentLogProps) {
                   </tr>
                 ) : (
                   filteredIncidents.map((incident) => (
-                    <tr key={incident.id} className="hover:bg-slate-700/50 transition-colors">
+                    <tr key={incident.id} className="hover:bg-[#2a2a2a] transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-300">
                         {new Date(incident.date).toLocaleDateString()}
                       </td>
@@ -185,7 +209,6 @@ export default function IncidentLog({ mines }: IncidentLogProps) {
             </table>
           </div>
         </div>
-      </div>
     </div>
   );
 }

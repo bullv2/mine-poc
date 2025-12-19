@@ -11,9 +11,15 @@ interface AnalysisSidebarProps {
 export default function AnalysisSidebar({ mine, isCollapsed, onToggleCollapse }: AnalysisSidebarProps) {
   if (!mine) {
     return (
-      <div className={`bg-slate-900 border-l border-slate-800 transition-all duration-300 ${
-        isCollapsed ? 'w-0 overflow-hidden' : 'w-96'
-      } flex items-center justify-center text-slate-400`}>
+      <div 
+        className={`backdrop-blur-sm border-l transition-all duration-300 ${
+          isCollapsed ? 'w-0 overflow-hidden' : 'w-96'
+        } flex items-center justify-center text-slate-400`}
+        style={{
+          backgroundColor: 'rgba(15, 23, 42, 0.65)',
+          borderLeftColor: 'rgba(30, 41, 59, 0.4)',
+        }}
+      >
         <p>Select a mine to view details</p>
       </div>
     );
@@ -43,9 +49,15 @@ export default function AnalysisSidebar({ mine, isCollapsed, onToggleCollapse }:
   };
 
   return (
-    <div className={`bg-slate-900 border-l border-slate-800 transition-all duration-300 overflow-y-auto ${
-      isCollapsed ? 'w-0 overflow-hidden' : 'w-96 max-w-[90vw]'
-    }`}>
+    <div 
+      className={`backdrop-blur-sm border-l transition-all duration-300 overflow-y-auto ${
+        isCollapsed ? 'w-0 overflow-hidden' : 'w-96 max-w-[90vw]'
+      }`}
+      style={{
+        backgroundColor: 'rgba(15, 23, 42, 0.85)',
+        borderLeftColor: 'rgba(30, 41, 59, 0.5)',
+      }}
+    >
       <div className="p-6 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -59,7 +71,13 @@ export default function AnalysisSidebar({ mine, isCollapsed, onToggleCollapse }:
         </div>
 
         {/* Weather Widget */}
-        <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
+        <div 
+          className="backdrop-blur-sm rounded-lg p-4 border"
+            style={{
+              backgroundColor: 'rgba(30, 41, 59, 0.6)',
+              borderColor: 'rgba(51, 65, 85, 0.4)',
+            }}
+        >
           <h3 className="text-sm font-semibold text-slate-300 mb-3 flex items-center gap-2">
             <Thermometer className="w-4 h-4" />
             Weather Conditions
@@ -80,7 +98,13 @@ export default function AnalysisSidebar({ mine, isCollapsed, onToggleCollapse }:
         </div>
 
         {/* Safety Metrics */}
-        <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
+        <div 
+          className="backdrop-blur-sm rounded-lg p-4 border"
+            style={{
+              backgroundColor: 'rgba(30, 41, 59, 0.6)',
+              borderColor: 'rgba(51, 65, 85, 0.4)',
+            }}
+        >
           <h3 className="text-sm font-semibold text-slate-300 mb-3 flex items-center gap-2">
             <AlertTriangle className="w-4 h-4" />
             Safety Metrics
@@ -142,7 +166,13 @@ export default function AnalysisSidebar({ mine, isCollapsed, onToggleCollapse }:
         </div>
 
         {/* Operational Data */}
-        <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
+        <div 
+          className="backdrop-blur-sm rounded-lg p-4 border"
+            style={{
+              backgroundColor: 'rgba(30, 41, 59, 0.6)',
+              borderColor: 'rgba(51, 65, 85, 0.4)',
+            }}
+        >
           <h3 className="text-sm font-semibold text-slate-300 mb-3 flex items-center gap-2">
             <Target className="w-4 h-4" />
             Operational Data
@@ -155,7 +185,12 @@ export default function AnalysisSidebar({ mine, isCollapsed, onToggleCollapse }:
                   {mine.production.current.toLocaleString()} / {mine.production.target.toLocaleString()} {mine.production.unit}
                 </span>
               </div>
-              <div className="w-full bg-slate-700 rounded-full h-3">
+              <div 
+                className="w-full rounded-full h-3"
+                style={{
+                  backgroundColor: 'rgba(51, 65, 85, 0.4)',
+                }}
+              >
                 <div
                   className={`h-3 rounded-full transition-all ${
                     productionPercentage >= 90 ? 'bg-green-500' :
@@ -169,7 +204,12 @@ export default function AnalysisSidebar({ mine, isCollapsed, onToggleCollapse }:
                 {productionPercentage.toFixed(1)}% of target
               </div>
             </div>
-            <div className="pt-2 border-t border-slate-700">
+            <div 
+              className="pt-2 border-t"
+              style={{
+                borderTopColor: 'rgba(51, 65, 85, 0.4)',
+              }}
+            >
               <div className="flex items-center justify-between text-sm">
                 <span className="text-slate-400">Site Temperature</span>
                 <span className="text-white font-semibold flex items-center gap-1">
